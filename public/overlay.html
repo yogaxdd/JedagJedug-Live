@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      margin: 0;
+      background: transparent !important;
+    }
+    #video-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0; /* Awalnya tersembunyi */
+      transition: opacity 0.5s ease-in-out;
+      pointer-events: none;
+    }
+    #video-container.active {
+      opacity: 1;
+    }
+    video {
+      max-width: 100vw;
+      max-height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="video-container">
+    <video id="player" playsinline></video>
+  </div>
+  <script>
+    const ws = new WebSocket(`ws://${window.location.host}`);
+    const player = document.getElementById('player');
+    const container = document.getElementById('video-container');
+
+    // Antrian video dan status pemutaran
+    let videoQueue = [];
+    let isPlaying = false;
+    let fallbackTimer = null;
+
+    // Fungsi untuk membersihkan fallback timer
+    function clearFallbackTimer() {
+      if (fallbackTimer) {
+        clearTimeout(fallbackTimer);
+        fallbackTimer = null;
+      }
+    }
+
+    // Fungsi untuk memproses video berikutnya di antrian
+    function playNext() {
+      if (videoQueue.length === 0) {
+        isPlaying = false;
+        return;
+      }
+      isPlaying = true;
+      const { video, duration: backendDuration } = videoQueue.shift();
+      const videoPath = `videos/${video}`;
+
+      // Muat video menggunakan fetch agar bisa menangani error jika file tidak ada
+      fetch(videoPath)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Video not found: ${videoPath}`);
+          }
+          return response.blob();
+        })
+        .then(() => {
+          // Set sumber video dan tampilkan overlay
+          player.src = videoPath;
+          container.classList.add('active');
+
+          // Setelah metadata video termuat, gunakan durasi aktual untuk fallback timer
+          player.onloadedmetadata = function() {
+            // Gunakan durasi aktual video (dalam milidetik) ditambah buffer (misalnya 1 detik)
+            const actualDuration = (player.duration * 1000) + 1000;
+            clearFallbackTimer();
+            fallbackTimer = setTimeout(() => {
+              if (!player.paused) {
+                console.warn('Timeout reached, forcing video to stop');
+                player.pause();
+                container.classList.remove('active');
+                player.src = '';
+                isPlaying = false;
+                playNext();
+              }
+            }, actualDuration);
+          };
+
+          // Mulai pemutaran video
+          return player.play();
+        })
+        .catch(err => {
+          console.error('❌ Play Error:', err);
+          container.classList.remove('active');
+          isPlaying = false;
+          playNext();
+        });
+    }
+
+    // Saat video selesai diputar secara natural, bersihkan timer dan lanjutkan ke video berikutnya
+    player.addEventListener('ended', () => {
+      console.log('Video ended naturally');
+      clearFallbackTimer();
+      container.classList.remove('active');
+      player.src = '';
+      isPlaying = false;
+      playNext();
+    });
+
+    // Tangani pesan WebSocket untuk penambahan video ke antrian
+    ws.onmessage = (e) => {
+      console.log('📨 Received WebSocket Message:', e.data);
+      const data = JSON.parse(e.data);
+      if (data.type === "play") {
+        // Masukkan data video ke antrian
+        videoQueue.push(data);
+        // Jika tidak ada video yang sedang diputar, mulai proses antrian
+        if (!isPlaying) {
+          playNext();
+        }
+      }
+    };
+  </script>
+</body>
+</html>

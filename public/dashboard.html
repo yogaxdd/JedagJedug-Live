@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual Video Control</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .video-button {
+      display: inline-block;
+      margin: 10px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .video-button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Kontrol Video Manual</h1>
+  <p>Klik tombol di bawah untuk memutar video:</p>
+
+  <button class="video-button" data-gift-id="5655">Rose</button>
+  <button class="video-button" data-gift-id="7934">Rose</button>
+  <button class="video-button" data-gift-id="5333">Coffee</button>
+  <button class="video-button" data-gift-id="7974">Anemo Slime</button>
+  <button class="video-button" data-gift-id="5879">Donat</button>
+  <button class="video-button" data-gift-id="9463">Fairy Wings</button>
+  <button class="video-button" data-gift-id="6064">GG</button>
+  <button class="video-button" data-gift-id="5487">Finger Heart</button>
+  <button class="video-button" data-gift-id="8913">Rosa</button>
+  <button class="video-button" data-gift-id="6427">Hat and Mustache</button>
+  <button class="video-button" data-gift-id="5660">Hand Hearts</button>
+
+  <script>
+    const buttons = document.querySelectorAll('.video-button');
+
+    buttons.forEach(button => {
+      button.addEventListener('click', async () => {
+        const giftId = button.getAttribute('data-gift-id');
+
+        try {
+          await fetch('/play-video', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ giftId })
+          });
+        } catch (error) {
+          console.error('Error playing video:', error);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

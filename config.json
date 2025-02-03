@@ -1,0 +1,13 @@
+{
+    "123": {
+        "videos": [
+            { "file": "video1.mp4", "duration": 5 },
+            { "file": "video2.mp4", "duration": 10 }
+        ]
+    },
+    "456": {
+        "videos": [
+            { "file": "video3.mp4", "duration": 7 }
+        ]
+    }
+}
