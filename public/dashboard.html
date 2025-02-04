@@ -1,65 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manual Video Control</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kontrol Video Manual</title>
   <style>
+    /* Reset CSS */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
     body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
+      background: #f0f2f5;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
     }
+    
+    .container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      max-width: 600px;
+      text-align: center;
+    }
+    
+    h1 {
+      margin-bottom: 20px;
+      font-size: 2rem;
+      color: #444;
+    }
+    
+    p {
+      margin-bottom: 20px;
+      font-size: 1.1rem;
+      color: #555;
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
+    }
+    
     .video-button {
-      display: inline-block;
-      margin: 10px;
-      padding: 10px 20px;
-      background-color: #007bff;
-      color: white;
+      background: linear-gradient(145deg, #6c63ff, #4a44e1);
       border: none;
-      border-radius: 5px;
+      color: #fff;
+      padding: 15px;
+      border-radius: 6px;
+      font-size: 1rem;
       cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.15),
+                  -4px -4px 8px rgba(255, 255, 255, 0.7);
     }
+    
     .video-button:hover {
-      background-color: #0056b3;
+      transform: translateY(-3px);
+      box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.25),
+                  -6px -6px 12px rgba(255, 255, 255, 0.9);
+    }
+    
+    @media (max-width: 500px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+      p {
+        font-size: 1rem;
+      }
+      .video-button {
+        padding: 12px;
+        font-size: 0.9rem;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Kontrol Video Manual</h1>
-  <p>Klik tombol di bawah untuk memutar video:</p>
-
-  <button class="video-button" data-gift-id="5655">Rose</button>
-  <button class="video-button" data-gift-id="7934">Rose</button>
-  <button class="video-button" data-gift-id="5333">Coffee</button>
-  <button class="video-button" data-gift-id="7974">Anemo Slime</button>
-  <button class="video-button" data-gift-id="5879">Donat</button>
-  <button class="video-button" data-gift-id="9463">Fairy Wings</button>
-  <button class="video-button" data-gift-id="6064">GG</button>
-  <button class="video-button" data-gift-id="5487">Finger Heart</button>
-  <button class="video-button" data-gift-id="8913">Rosa</button>
-  <button class="video-button" data-gift-id="6427">Hat and Mustache</button>
-  <button class="video-button" data-gift-id="5660">Hand Hearts</button>
-
-  <script>
-    const buttons = document.querySelectorAll('.video-button');
-
-    buttons.forEach(button => {
-      button.addEventListener('click', async () => {
-        const giftId = button.getAttribute('data-gift-id');
-
-        try {
-          await fetch('/play-video', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ giftId })
-          });
-        } catch (error) {
-          console.error('Error playing video:', error);
-        }
+  <div class="container">
+    <h1>YogaxD Control Live</h1>
+    <p>Version : 1.4.2</p>
+    <div class="grid">
+      <button class="video-button" data-gift-id="5655">Rose</button>
+      <button class="video-button" data-gift-id="7934">Heart Me</button>
+      <button class="video-button" data-gift-id="5333">Coffee</button>
+      <button class="video-button" data-gift-id="7974">Anemo Slime</button>
+      <button class="video-button" data-gift-id="5879">Donat</button>
+      <button class="video-button" data-gift-id="9463">Fairy Wings</button>
+      <button class="video-button" data-gift-id="6064">GG</button>
+      <button class="video-button" data-gift-id="5487">Finger Heart</button>
+      <button class="video-button" data-gift-id="8913">Rosa</button>
+      <button class="video-button" data-gift-id="6427">Hat and Mustache</button>
+      <button class="video-button" data-gift-id="5660">Hand Hearts</button>
+    </div>
+    <script>
+      const buttons = document.querySelectorAll('.video-button');
+      buttons.forEach(button => {
+        button.addEventListener('click', async () => {
+          const giftId = button.getAttribute('data-gift-id');
+          try {
+            await fetch('/play-video', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ giftId })
+            });
+          } catch (error) {
+            console.error('Error playing video:', error);
+          }
+        });
       });
-    });
-  </script>
+    </script>
+  </div>
 </body>
 </html>
