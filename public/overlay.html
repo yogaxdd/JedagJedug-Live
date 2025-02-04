@@ -29,7 +29,10 @@
     <video id="player" playsinline></video>
   </div>
   <script>
-    const ws = new WebSocket(`ws://${window.location.host}`);
+    // Gunakan protokol WSS jika halaman diakses melalui HTTPS, atau WS jika HTTP
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const ws = new WebSocket(`${protocol}://${window.location.host}`);
+    
     const player = document.getElementById('player');
     const container = document.getElementById('video-container');
 
@@ -46,7 +49,7 @@
       }
     }
 
-    // Fungsi untuk memproses video berikutnya di antrian
+    // Fungsi untuk memproses video berikutnya dalam antrian
     function playNext() {
       if (videoQueue.length === 0) {
         isPlaying = false;
@@ -56,7 +59,7 @@
       const { video, duration: backendDuration } = videoQueue.shift();
       const videoPath = `videos/${video}`;
 
-      // Muat video menggunakan fetch agar bisa menangani error jika file tidak ada
+      // Cek ketersediaan file video menggunakan fetch
       fetch(videoPath)
         .then(response => {
           if (!response.ok) {
@@ -71,8 +74,7 @@
 
           // Setelah metadata video termuat, gunakan durasi aktual untuk fallback timer
           player.onloadedmetadata = function() {
-            // Gunakan durasi aktual video (dalam milidetik) ditambah buffer (misalnya 1 detik)
-            const actualDuration = (player.duration * 1000) + 1000;
+            const actualDuration = (player.duration * 1000) + 1000; // Buffer 1 detik
             clearFallbackTimer();
             fallbackTimer = setTimeout(() => {
               if (!player.paused) {
@@ -97,7 +99,7 @@
         });
     }
 
-    // Saat video selesai diputar secara natural, bersihkan timer dan lanjutkan ke video berikutnya
+    // Event listener: Saat video selesai diputar secara natural, bersihkan timer dan lanjutkan antrian
     player.addEventListener('ended', () => {
       console.log('Video ended naturally');
       clearFallbackTimer();
@@ -107,14 +109,12 @@
       playNext();
     });
 
-    // Tangani pesan WebSocket untuk penambahan video ke antrian
+    // Tangani pesan WebSocket untuk menambahkan video ke antrian
     ws.onmessage = (e) => {
       console.log('📨 Received WebSocket Message:', e.data);
       const data = JSON.parse(e.data);
       if (data.type === "play") {
-        // Masukkan data video ke antrian
         videoQueue.push(data);
-        // Jika tidak ada video yang sedang diputar, mulai proses antrian
         if (!isPlaying) {
           playNext();
         }
